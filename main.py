@@ -2,7 +2,7 @@ import os
 import random
 from dotenv import load_dotenv
 from discord.ext import commands
-
+import googletrans
 
 load_dotenv()
 
@@ -23,8 +23,34 @@ async def greet_the_user(ctx):
 
 
 @bot.command(name="translate", help="belirlenen dilden diğer dile çeviri yapar => (!translate en tr Hello)")
-async def translate(ctx, fr, to, word):
-    await ctx.send("Şu anlık çeviri yapamıyorum")
+async def translate(ctx, src, dest, word):
+    if src not in googletrans.LANGCODES.values():
+        await ctx.send("hatalı kaynak dil kodu!")
+        return
+
+    if dest not in googletrans.LANGCODES.values():
+        await ctx.send("hatalı hedef dil kodu!")
+        return
+
+    translator = googletrans.Translator()
+    translated = translator.translate(word, src=src, dest=dest)
+    await ctx.send(f" {word} => {translated.text}")
+
+
+@bot.command(name="langcodes", help="çeviri yapmak için desteklenen dil kodlarını listeler")
+async def langcodes(ctx):
+    languages = googletrans.LANGCODES.keys()
+    codes = googletrans.LANGCODES.values()
+
+    pairs = []
+
+    for language in googletrans.LANGCODES.keys():
+        code = googletrans.LANGCODES[language]
+
+        pairs.append(f"- {language} => {code}")
+
+    pair_list = "\n".join(pairs)
+    await ctx.send(pair_list)
 
 
 @bot.command(name="roll", help="Zar atar")
