@@ -32,4 +32,15 @@ async def roll(ctx):
     await ctx.send(f"gelen zar: {dice}")
     dice = None
 
+
+@bot.command(name="members", help="Sunucudaki üyeleri listeler")
+async def members(ctx):
+    member_names = []
+    for member in ctx.guild.members:
+        member_names.append(member.name)
+
+    member_list = "\n".join(member_names)
+    await ctx.send(member_list)
+
+
 bot.run(TOKEN)
