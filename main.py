@@ -3,6 +3,7 @@ import random
 from dotenv import load_dotenv
 from discord.ext import commands
 
+
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -41,6 +42,10 @@ async def members(ctx):
 
     member_list = "\n".join(member_names)
     await ctx.send(member_list)
+
+@bot.command(name="bot-bb", help = "Bot-BB hakkında bilgi verir")
+async def bot_bb(ctx):
+    await ctx.send("Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
 
 
 bot.run(TOKEN)
