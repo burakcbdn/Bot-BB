@@ -26,5 +26,10 @@ async def translate(ctx, fr, to, word):
     await ctx.send("Şu anlık çeviri yapamıyorum")
 
 
+@bot.command(name="roll", help="Zar atar")
+async def roll(ctx):
+    dice = random.randint(0, 6)
+    await ctx.send(f"gelen zar: {dice}")
+    dice = None
 
 bot.run(TOKEN)
