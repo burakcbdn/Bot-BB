@@ -1,28 +1,30 @@
 import os
-import discord
+import random
 from dotenv import load_dotenv
+from discord.ext import commands
 
 load_dotenv()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
-client = discord.Client()
+bot = commands.Bot(command_prefix="!")
 
 
-@client.event
+@bot.event
 async def on_ready():
-    for guild in client.guilds:
-        if guild.name == GUILD:
-            break
-
-    print(f'{client.user} is connected to the following guild:\n'
-          f'{guild.name}(id: {guild.id})')
-
-@client.event
-async  def on_member_join(member):
-    await member.create_dm()
-    await member.dm_channel.send(f'Merhaba, {member.name}! BBChat Discord sunucusuna hoş geldin.')
+    print(f'{bot.user.name} has connected to server')
 
 
-client.run(TOKEN)
+@bot.command(name="selam", help="Sizi selamlar")
+async def greet_the_user(ctx):
+    await ctx.send(f"Selam, {ctx.message.author.name}!")
+
+
+@bot.command(name="translate", help="belirlenen dilden diğer dile çeviri yapar => (!translate en tr Hello)")
+async def translate(ctx, fr, to, word):
+    await ctx.send("Şu anlık çeviri yapamıyorum")
+
+
+
+bot.run(TOKEN)
