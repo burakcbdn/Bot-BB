@@ -1,5 +1,6 @@
 import os
 import random
+import requests
 from dotenv import load_dotenv
 from discord.ext import commands
 import googletrans
@@ -72,6 +73,35 @@ async def members(ctx):
 @bot.command(name="bot-bb", help = "Bot-BB hakkında bilgi verir")
 async def bot_bb(ctx):
     await ctx.send("Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
+    
+
+@bot.command(name="covid", help="seçilen ülkenin covid-19 istatistiklerini gösterir")
+async def display_covid(ctx, country = None):
+    try:
+        info = getCovidInfo(country)
+        tC = info["totalConfirmed"]
+        tD = info["totalDeath"]
+        await ctx.send(f"-{country}- \n  toplam vaka: {tC} \n  toplam ölüm: {tD}")
+    except:
+        await ctx.send("Ülke ismi belirtmediniz (!covid turkey)")
+
+
+def getCovidInfo(country):
+    response = requests.get("https://api.covid19api.com/summary")
+
+    if response.status_code == 200:
+        countries = response.json()["Countries"]
+        country = country
+        for data in countries:
+            if data["Country"].lower()==country.lower():
+                totalConfirmed = data["TotalConfirmed"]
+                totalDeath = data["TotalDeaths"]
+                return {"totalConfirmed":totalConfirmed, "totalDeath": totalDeath}
+        
+    else:
+        return
+
+
 
 
 bot.run(TOKEN)
