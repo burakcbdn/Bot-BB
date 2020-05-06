@@ -1,6 +1,5 @@
 discord-py
 googletrans
-os
 dotenv
 random
 webbrowser
