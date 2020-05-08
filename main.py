@@ -162,6 +162,21 @@ async def play(ctx, url: str):
     voice.source.volume = 0.07
     name = name.rsplit('-', 2)
     await ctx.send(f"'{name[0]}' çalınıyor")
+    
+    
+@bot.command(name="stop")
+async def stop(ctx):
+    channel = ctx.author.voice.channel
+    voice = get(bot.voice_clients, guild = ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.disconnect()
+        print(f"the bot has left channel {channel}")
+        await ctx.send(f"'{channel}' ses kanalından ayrıldım")
+
+    else:
+        print("bot is not in any channel")
+        await ctx.send("Herhangi bir kanalda değilim ki :(")
 
 
 bot.run(TOKEN)
