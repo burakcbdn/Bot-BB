@@ -1,3 +1,5 @@
 discord-py
 googletrans
 python-dotenv
+youtube-dl
+ffmpeg
