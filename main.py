@@ -1,9 +1,13 @@
 import os
 import random
-import requests
-from dotenv import load_dotenv
-from discord.ext import commands
+import webbrowser
 import googletrans
+import requests
+import youtube_dl
+import discord
+from discord.ext import commands
+from discord.utils import get
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -102,6 +106,62 @@ def getCovidInfo(country):
         return
 
 
+@bot.command(name="play")
+async def play(ctx, url: str):
+
+
+    #joining the channel
+    global voice
+    channel = ctx.message.author.voice.channel
+    voice = get(bot.voice_clients, guild = ctx.guild)
+
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+
+    else:
+        voice = await channel.connect()
+        print(f"the bot has connected to {channel} \n")
+
+    await ctx.send(f"'{channel}' ses kanalına bağlandım")
+
+    #playing audio
+
+    is_song_exist = os.path.isfile("audio.mp3")
+    try:
+        if is_song_exist:
+            os.remove("audio.mp3")
+            print("old file removed")
+
+    except PermissionError:
+        await ctx.send("Zaten bir ses çalıyor.")
+        return
+
+    await ctx.send("Sahneye hazırlanıyorum. Beklemelisin :)")
+
+    ydl_options = {
+        'format':'bestaudio/best',
+        'postprocessors': [{
+            'key':'FFmpegExtractAudio',
+            'preferredcodec':'mp3',
+            'preferredquality':'192'
+
+        }]
+    }
+
+    with youtube_dl.YoutubeDL(ydl_options) as ydl:
+        print("downloading audio")
+        ydl.download([url])
+
+    for file in os.listdir('./'):
+        if file.endswith('.mp3'):
+            name = file
+            os.rename(file, 'audio.mp3')
+
+    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e : print(f"{name} has finished playing"))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+    name = name.rsplit('-', 2)
+    await ctx.send(f"'{name[0]}' çalınıyor")
 
 
 bot.run(TOKEN)
