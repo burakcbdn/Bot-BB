@@ -8,7 +8,6 @@ import discord
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
-from boto.s3.connection import S3Connection
 
 load_dotenv()
 
