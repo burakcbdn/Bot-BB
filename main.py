@@ -12,7 +12,7 @@ from boto.s3.connection import S3Connection
 
 load_dotenv()
 
-TOKEN = os.environ('BOT_TOKEN')
+TOKEN = os.environ.get('BOT_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 
 bot = commands.Bot(command_prefix="!")
