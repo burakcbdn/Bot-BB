@@ -122,10 +122,9 @@ def getCovidInfo(country):
     else:
         return
 
-
-@bot.command(name="play")
-async def play(ctx, url: str):
-    # joining the channel
+@bot.command(name="join")
+async def join(ctx):
+        # joining the channel
     global voice
     channel = ctx.message.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
@@ -139,8 +138,13 @@ async def play(ctx, url: str):
     embed = discord.Embed(color=0x00ff00, description=f"'{channel}' ses kanalına bağlandım")
     await ctx.send(embed=embed)
 
-    # playing audio
 
+@bot.command(name="play")
+async def play(ctx, url: str):
+
+
+    # playing audio
+    
     is_song_exist = os.path.isfile("audio.mp3")
     try:
         if is_song_exist:
@@ -153,7 +157,7 @@ async def play(ctx, url: str):
         return
     embed = discord.Embed(color=0x00ff00, description="Sahneye hazırlanıyorum. Beklemelisin :)")
     await ctx.send(embed=embed)
-
+    voice = get(bot.voice_clients, guild=ctx.guild)
     ydl_options = {
         'format': 'bestaudio/best',
         'postprocessors': [{
