@@ -3,4 +3,3 @@ googletrans
 python-dotenv
 youtube-dl
 PyNaCl
-boto
