@@ -24,25 +24,30 @@ async def on_ready():
 
 @bot.command(name="selam", help="Sizi selamlar")
 async def greet_the_user(ctx):
-    embed = discord.Embed(color = 0x00ff00, description=f"Selam, {ctx.message.author.name}!")
+    embed = discord.Embed(color=0x00ff00, description=f"Selam, {ctx.message.author.name}!")
     await ctx.send(embed=embed)
+
+
+@bot.command(name="github", help="burakcbdn github profilini açar")
+async def launch_github(ctx):
+    webbrowser.open("www.github.com/burakcbdn")
 
 
 @bot.command(name="translate", help="belirlenen dilden diğer dile çeviri yapar => (!translate en tr Hello)")
 async def translate(ctx, src, dest, word):
     if src not in googletrans.LANGCODES.values():
-        embed = discord.Embed(color = 0x00ff00, description="hatalı kaynak dil kodu!")
+        embed = discord.Embed(color=0x00ff00, description="hatalı kaynak dil kodu!")
         await ctx.send(embed=embed)
         return
 
     if dest not in googletrans.LANGCODES.values():
-        embed = discord.Embed(color = 0x00ff00, description="hatalı hedef dil kodu!")
+        embed = discord.Embed(color=0x00ff00, description="hatalı hedef dil kodu!")
         await ctx.send(embed=embed)
         return
 
     translator = googletrans.Translator()
     translated = translator.translate(word, src=src, dest=dest)
-    embed = discord.Embed(color = 0x00ff00, description=f" {word} => {translated.text}")
+    embed = discord.Embed(color=0x00ff00, description=f" {word} => {translated.text}")
     await ctx.send(embed=embed)
 
 
@@ -59,14 +64,14 @@ async def langcodes(ctx):
         pairs.append(f"- {language} => {code}")
 
     pair_list = "\n".join(pairs)
-    embed = discord.Embed(color = 0x00ff00, description=pair_list)
+    embed = discord.Embed(color=0x00ff00, description=pair_list)
     await ctx.send(embed=embed)
 
 
 @bot.command(name="roll", help="Zar atar")
 async def roll(ctx):
     dice = random.randint(0, 6)
-    embed = discord.Embed(color = 0x00ff00, description=f"gelen zar: {dice}")
+    embed = discord.Embed(color=0x00ff00, description=f"gelen zar: {dice}")
     await ctx.send(embed=embed)
     dice = None
 
@@ -78,25 +83,27 @@ async def members(ctx):
         member_names.append(member.name)
 
     member_list = "\n".join(member_names)
-    embed = discord.Embed(color = 0x00ff00, description=member_list)
+    embed = discord.Embed(color=0x00ff00, description=member_list)
     await ctx.send(embed=embed)
 
-@bot.command(name="bot-bb", help = "Bot-BB hakkında bilgi verir")
+
+@bot.command(name="bot-bb", help="Bot-BB hakkında bilgi verir")
 async def bot_bb(ctx):
-    embed = discord.Embed(color = 0x00ff00, description="Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
+    embed = discord.Embed(color=0x00ff00,
+                          description="Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
     await ctx.send(embed=embed)
 
 
 @bot.command(name="covid", help="seçilen ülkenin covid-19 istatistiklerini gösterir")
-async def display_covid(ctx, country = None):
+async def display_covid(ctx, country=None):
     try:
         info = getCovidInfo(country)
         tC = info["totalConfirmed"]
         tD = info["totalDeath"]
-        embed = discord.Embed(color = 0x00ff00, description=f"-{country}- \n  toplam vaka: {tC} \n  toplam ölüm: {tD}")
+        embed = discord.Embed(color=0x00ff00, description=f"-{country}- \n  toplam vaka: {tC} \n  toplam ölüm: {tD}")
         await ctx.send(embed=embed)
     except:
-        embed = discord.Embed(color = 0x00ff00, description="Ülke ismi belirtmediniz (!covid turkey)")
+        embed = discord.Embed(color=0x00ff00, description="Ülke ismi belirtmediniz (!covid turkey)")
         await ctx.send(embed=embed)
 
 
@@ -107,23 +114,21 @@ def getCovidInfo(country):
         countries = response.json()["Countries"]
         country = country
         for data in countries:
-            if data["Country"].lower()==country.lower():
+            if data["Country"].lower() == country.lower():
                 totalConfirmed = data["TotalConfirmed"]
                 totalDeath = data["TotalDeaths"]
-                return {"totalConfirmed":totalConfirmed, "totalDeath": totalDeath}
-        
+                return {"totalConfirmed": totalConfirmed, "totalDeath": totalDeath}
+
     else:
         return
 
 
 @bot.command(name="play")
 async def play(ctx, url: str):
-
-
-    #joining the channel
+    # joining the channel
     global voice
     channel = ctx.message.author.voice.channel
-    voice = get(bot.voice_clients, guild = ctx.guild)
+    voice = get(bot.voice_clients, guild=ctx.guild)
 
     if voice and voice.is_connected():
         await voice.move_to(channel)
@@ -131,10 +136,10 @@ async def play(ctx, url: str):
     else:
         voice = await channel.connect()
         print(f"the bot has connected to {channel} \n")
-    embed = discord.Embed(color = 0x00ff00, description=f"'{channel}' ses kanalına bağlandım")
+    embed = discord.Embed(color=0x00ff00, description=f"'{channel}' ses kanalına bağlandım")
     await ctx.send(embed=embed)
 
-    #playing audio
+    # playing audio
 
     is_song_exist = os.path.isfile("audio.mp3")
     try:
@@ -143,18 +148,18 @@ async def play(ctx, url: str):
             print("old file removed")
 
     except PermissionError:
-        embed = discord.Embed(color = 0x00ff00, description="Maalesef aynı anda iki ses çalamam.")
+        embed = discord.Embed(color=0x00ff00, description="Maalesef aynı anda iki ses çalamam.")
         await ctx.send(embed=embed)
         return
-    embed = discord.Embed(color = 0x00ff00, description="Sahneye hazırlanıyorum. Beklemelisin :)")
+    embed = discord.Embed(color=0x00ff00, description="Sahneye hazırlanıyorum. Beklemelisin :)")
     await ctx.send(embed=embed)
 
     ydl_options = {
-        'format':'bestaudio/best',
+        'format': 'bestaudio/best',
         'postprocessors': [{
-            'key':'FFmpegExtractAudio',
-            'preferredcodec':'mp3',
-            'preferredquality':'192'
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192'
 
         }]
     }
@@ -168,28 +173,28 @@ async def play(ctx, url: str):
             name = file
             os.rename(file, 'audio.mp3')
 
-    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e : print(f"{name} has finished playing"))
+    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: print(f"{name} has finished playing"))
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07
     name = name.rsplit('-')
-    embed = discord.Embed(color = 0x00ff00, description=f"'{name[0]+name[1]}' çalınıyor")
+    embed = discord.Embed(color=0x00ff00, description=f"'{name[0] + name[1]}' çalınıyor")
     await ctx.send(embed=embed)
-    
-    
+
+
 @bot.command(name="stop")
 async def stop(ctx):
     channel = ctx.author.voice.channel
-    voice = get(bot.voice_clients, guild = ctx.guild)
+    voice = get(bot.voice_clients, guild=ctx.guild)
 
     if voice and voice.is_connected():
         await voice.disconnect()
         print(f"the bot has left channel {channel}")
-        embed = discord.Embed(color = 0x00ff00, description=f"'{channel}' ses kanalından ayrıldım")
+        embed = discord.Embed(color=0x00ff00, description=f"'{channel}' ses kanalından ayrıldım")
         await ctx.send(embed=embed)
 
     else:
         print("bot is not in any channel")
-        embed = discord.Embed(color = 0x00ff00, description="Herhangi bir kanalda değilim ki :(")
+        embed = discord.Embed(color=0x00ff00, description="Herhangi bir kanalda değilim ki :(")
         await ctx.send(embed=embed)
 
 
