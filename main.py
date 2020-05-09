@@ -17,6 +17,11 @@ GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix="!")
 
 
+async def send_embedded(ctx, content):
+    embed = discord.Embed(color=0x00ff00, description=content)
+    await ctx.send(embed=embed)
+
+
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to server')
@@ -144,7 +149,7 @@ async def play(ctx, url: str):
 
 
     # playing audio
-    
+
     is_song_exist = os.path.isfile("audio.mp3")
     try:
         if is_song_exist:
@@ -185,8 +190,8 @@ async def play(ctx, url: str):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="stop")
-async def stop(ctx):
+@bot.command(name="leave")
+async def leave(ctx):
     channel = ctx.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -200,6 +205,21 @@ async def stop(ctx):
         print("bot is not in any channel")
         embed = discord.Embed(color=0x00ff00, description="Herhangi bir kanalda değilim ki :(")
         await ctx.send(embed=embed)
+
+
+@bot.command(name="pause")
+async def pause(ctx):
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        voice.pause()
+        await send_embedded(ctx, "Ses durduruldu.")
+
+    else:
+        await send_embedded(ctx, "Ortalık zaten sessiz.")
+
+
+
 
 
 bot.run(TOKEN)
