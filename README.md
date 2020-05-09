@@ -19,8 +19,6 @@ BB Discord Bot
   stops the currently playing audio.
 - **!roll**:
   rolls a dice.
-- **!help**:
+- **help**:
   shows commands with descriptions.
-- **!github**:
-  opens burakcbdn github profile on browser.
 
