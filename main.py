@@ -231,4 +231,16 @@ async def resume(ctx):
         await send_embedded(ctx, "Ses zaten yürütülüyor")
 
 
+@bot.command(name="stop")
+async def stop(ctx):
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        voice.stop()
+        await send_embedded(ctx, "Ses durduruldu")
+
+    else:
+        await send_embedded(ctx, "Ortalık zaten sessiz.")
+
+
 bot.run(TOKEN)
