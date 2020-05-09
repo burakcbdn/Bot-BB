@@ -1,7 +1,7 @@
-## Bot-BB
+# Bot-BB
 BB Discord Bot
 
-#commands
+## commands
 
 - **!selam**
 :greets the user.
