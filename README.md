@@ -3,8 +3,8 @@ BB Discord Bot
 
 ## commands
 
-- **!selam**
-:greets the user.
+- **!selam**: 
+  greets the user.
 - **!covid <*country*>**:
   shows covid info about specified country.
 - **!translate <*src_lang_code*> <*dest_lang_code*> <*word*>**:
@@ -15,7 +15,7 @@ BB Discord Bot
   shows list of members in the server.
 - **!join**:
   joins the users voice channel (required before playing audio).
-- **!play <*youtube_link or spotify link or song name*>**:
+- **!play <*youtube_link or spotify_link or song_name*>**:
   plays specified audio in the voice channel.
 - **!pause**:
   pauses the currently playing audio.
