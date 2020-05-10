@@ -4,30 +4,32 @@ BB Discord Bot
 ## commands
 
 - **!selam**: 
-  greets the user.
+  Greets the user.
 - **!covid <*country*>**:
-  shows covid info about specified country.
+  Shows covid info about specified country.
 - **!translate <*src_lang_code*> <*dest_lang_code*> <*word*>**:
-  translates word from source language to destination language.
+  Translates word from source language to destination language.
 - **!langcodes**:
-  shows available language codes for translate.
+  Shows available language codes for translate.
 - **!members**:
-  shows list of members in the server.
+  Shows list of members in the server.
 - **!join**:
-  joins the users voice channel (required before playing audio).
+  Joins the users voice channel (required before playing audio).
 - **!play <*youtube_link or spotify_link or song_name*>**:
-  plays specified audio in the voice channel.
+  Plays specified audio in the voice channel.
+- **!queue <*youtube_link or spotify_link or song_name*>**:
+  Adds specified audio to the queue.
 - **!pause**:
-  pauses the currently playing audio.
+  Pauses the currently playing audio.
 - **!resume**:
-  resumes the paused audio.
+  Resumes the paused audio.
 - **!stop**:
-  stops the currently playing audio.
+  Stops the currently playing audio.
 - **!leave**:
-  leaves current voice channel.
+  Leaves current voice channel.
 - **!roll**:
-  rolls a dice.
+  Rolls a dice.
 - **!help**:
-  shows commands with descriptions.
+  Shows commands with descriptions.
 - **!github**:
-  opens burakcbdn github profile on browser.
+  Opens burakcbdn github profile on browser.
