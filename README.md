@@ -13,10 +13,18 @@ BB Discord Bot
   shows available language codes for translate.
 - **!members**:
   shows list of members in the server.
-- **!play <*youtube_link*>**:
+- **!join**:
+  joins the users voice channel (required before playing audio).
+- **!play <*youtube_link or spotify link or song name*>**:
   plays specified audio in the voice channel.
+- **!pause**:
+  pauses the currently playing audio.
+- **!resume**:
+  resumes the paused audio.
 - **!stop**:
   stops the currently playing audio.
+- **!leave**:
+  leaves current voice channel.
 - **!roll**:
   rolls a dice.
 - **!help**:
