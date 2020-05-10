@@ -148,7 +148,12 @@ async def join(ctx):
 
 
 @bot.command(name="play")
-async def play(ctx, url: str):
+async def play(ctx, url: str, *words):
+
+    for word in words:
+        if word == "-":
+            url = url + word
+        url = url + "_" + word
 
     def check_queue():
         Queue_infile = os.path.isdir("./Queue")
@@ -225,10 +230,14 @@ async def play(ctx, url: str):
         }]
     }
 
-    with youtube_dl.YoutubeDL(ydl_options) as ydl:
-        print("downloading audio")
-        ydl.download([url])
-
+    try:
+        with youtube_dl.YoutubeDL(ydl_options) as ydl:
+            print("downloading audio")
+            ydl.download([url])
+    except:
+        print("Unsupported url type. Trying Spotify.")
+        c_path = os.path.dirname(os.path.realpath(__file__))
+        system("spotdl -f" + '"' + c_path + '"' + " -s " + url)
     for file in os.listdir('./'):
         if file.endswith('.mp3'):
             name = file
@@ -238,9 +247,9 @@ async def play(ctx, url: str):
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07
 
-    name = name.rsplit('-')
+    nname = name.rsplit('-')
 
-    embed = discord.Embed(color=0x00ff00, description=f"'{name[0] + name[1]}' çalınıyor")
+    embed = discord.Embed(color=0x00ff00, description=f"'{nname[0] + nname[1]}' çalınıyor")
     await ctx.send(embed=embed)
 
 
@@ -331,10 +340,14 @@ async def queue(ctx, url: str):
         }]
     }
 
-    with youtube_dl.YoutubeDL(ydl_options) as ydl:
-        print("downloading audio")
-        ydl.download([url])
-
+    try:
+        with youtube_dl.YoutubeDL(ydl_options) as ydl:
+            print("downloading audio")
+            ydl.download([url])
+    except:
+        print("Unsupported url type. Trying Spotify.")
+        q_path = os.path.abspath(os.path.realpath("Queue"))
+        system(f"spotdl -ff audio{q_num} -f "+ '"' + q_path + '"' + " -s "+url)
     await send_embedded(ctx, f"ses{q_num} sıraya eklendi!")    
 
     print("sond added to queue")
