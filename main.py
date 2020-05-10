@@ -285,7 +285,6 @@ async def resume(ctx):
         await send_embedded(ctx, "Ses zaten yürütülüyor")
 
 
-<<<<<<< HEAD
 @bot.command(name="stop")
 async def stop(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
@@ -341,6 +340,4 @@ async def queue(ctx, url: str):
     print("sond added to queue")
 
 
-=======
->>>>>>> parent of 8df2d23... !stop added
 bot.run(TOKEN)
