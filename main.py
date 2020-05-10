@@ -44,18 +44,18 @@ async def on_ready():
     print(f'{bot.user.name} has connected to server')
 
 
-@bot.command(name="selam", help="Sizi selamlar")
+@bot.command(name="selam", help="Greets the user.")
 async def greet_the_user(ctx):
     embed = discord.Embed(color=0x00ff00, description=f"Selam, {ctx.message.author.name}!")
     await ctx.send(embed=embed)
 
 
-@bot.command(name="github", help="burakcbdn github profilini açar")
+@bot.command(name="github", help="opens burakcbdn github profile on browser.")
 async def launch_github(ctx):
     webbrowser.open("www.github.com/burakcbdn")
 
 
-@bot.command(name="translate", help="belirlenen dilden diğer dile çeviri yapar => (!translate en tr Hello)")
+@bot.command(name="translate", help="translates word from source language to destination language.")
 async def translate(ctx, src, dest, word):
     if src not in googletrans.LANGCODES.values():
         embed = discord.Embed(color=0x00ff00, description="hatalı kaynak dil kodu!")
@@ -73,7 +73,7 @@ async def translate(ctx, src, dest, word):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="langcodes", help="çeviri yapmak için desteklenen dil kodlarını listeler")
+@bot.command(name="langcodes", help="lists all the available language codes for translate.")
 async def langcodes(ctx):
     languages = googletrans.LANGCODES.keys()
     codes = googletrans.LANGCODES.values()
@@ -90,7 +90,7 @@ async def langcodes(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="roll", help="Zar atar")
+@bot.command(name="roll", help="Rolls a dice.")
 async def roll(ctx):
     dice = random.randint(0, 6)
     embed = discord.Embed(color=0x00ff00, description=f"gelen zar: {dice}")
@@ -98,7 +98,7 @@ async def roll(ctx):
     dice = None
 
 
-@bot.command(name="members", help="Sunucudaki üyeleri listeler")
+@bot.command(name="members", help="Lists members in the server.")
 async def members(ctx):
     member_names = []
     for member in ctx.guild.members:
@@ -109,14 +109,14 @@ async def members(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="bot-bb", help="Bot-BB hakkında bilgi verir")
+@bot.command(name="bot-bb", help="Gives information about Bot-BB")
 async def bot_bb(ctx):
     embed = discord.Embed(color=0x00ff00,
                           description="Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
     await ctx.send(embed=embed)
 
 
-@bot.command(name="covid", help="seçilen ülkenin covid-19 istatistiklerini gösterir")
+@bot.command(name="covid", help="Shows statistics about covid in country.")
 async def display_covid(ctx, country=None):
     try:
         info = getCovidInfo(country)
@@ -129,7 +129,7 @@ async def display_covid(ctx, country=None):
         await ctx.send(embed=embed)
 
 
-@bot.command(name="join")
+@bot.command(name="join", help="Moves bot to users voice channel.")
 async def join(ctx):
         # joining the channel
     global voice
@@ -147,7 +147,7 @@ async def join(ctx):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="play")
+@bot.command(name="play", help="Plays audio in the voice channel.")
 async def play(ctx, url: str, *words):
 
     for word in words:
@@ -253,7 +253,7 @@ async def play(ctx, url: str, *words):
     await ctx.send(embed=embed)
 
 
-@bot.command(name="leave")
+@bot.command(name="leave", help = "Bot-BB leaves current voice channel.")
 async def leave(ctx):
     channel = ctx.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
@@ -270,7 +270,7 @@ async def leave(ctx):
         await ctx.send(embed=embed)
 
 
-@bot.command(name="pause")
+@bot.command(name="pause", help="Pauses currently playing audio.")
 async def pause(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -282,7 +282,7 @@ async def pause(ctx):
         await send_embedded(ctx, "Ortalık zaten sessiz.")
 
 
-@bot.command(name="resume")
+@bot.command(name="resume", help="Resumes paused audio.")
 async def resume(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -294,7 +294,7 @@ async def resume(ctx):
         await send_embedded(ctx, "Ses zaten yürütülüyor")
 
 
-@bot.command(name="stop")
+@bot.command(name="stop", help="Stops currently playing audio.")
 async def stop(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -310,8 +310,14 @@ async def stop(ctx):
 
 queues = {}
 
-@bot.command(name="queue")
-async def queue(ctx, url: str):
+@bot.command(name="queue",help="Adds songs to queue.")
+async def queue(ctx, url: str, *args):
+
+    for word in words:
+        if word == "-":
+            url = url + word
+        url = url + "_" + word
+
     Queue_infile = os.path.isdir("./Queue")
     if Queue_infile is False:
         os.mkdir("Queue")
