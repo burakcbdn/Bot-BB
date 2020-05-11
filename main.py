@@ -302,7 +302,7 @@ async def stop(ctx):
 
     else:
         await send_embedded(ctx, "Ortalık zaten sessiz.")
-
+        
 
 queues = {}
 
@@ -353,6 +353,18 @@ async def queue(ctx, url: str, *words):
     await send_embedded(ctx, f"ses sıraya eklendi!")    
 
     print("sond added to queue")
+
+
+@bot.command(name="next", help="Plays the next song in queue.")
+async def next(ctx):
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if voice and voice.is_playing():
+        voice.stop()
+        await send_embedded(ctx, "Sıradaki ses oynatılıyor.")
+
+    else:
+        await send_embedded(ctx, "Oops. Bir şeyler oldu.")
 
 
 bot.run(TOKEN)
