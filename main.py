@@ -6,6 +6,7 @@ import requests
 import youtube_dl
 import discord
 import shutil
+import sqlite3
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
@@ -16,6 +17,10 @@ load_dotenv()
 TOKEN = os.environ.get('BOT_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix="!")
+DIR = os.path.dirname(__file__)
+db = sqlite3.connect(os.path.join(DIR, "SongTracker.db"))  # connecting to DB if this file is not there it will create it
+SQL = db.cursor()
+
 
 
 async def send_embedded(ctx, content):
@@ -119,6 +124,34 @@ async def display_covid(ctx, country=None):
 
 @bot.command(name="join", help="Moves bot to users voice channel.")
 async def join(ctx):
+    ###DATABASE CONNECTION###
+    SQL.execute('create table if not exists Music('
+            '"Num" integer not null primary key autoincrement, '
+            '"Server_ID" integer, '
+            '"Server_Name" text, '
+            '"Voice_ID" integer, '
+            '"Voice_Name" text, '
+            '"User_Name" text, '
+            '"Next_Queue" integer, '
+            '"Queue_Name" text, '
+            '"Song_Name" text'
+            ')')
+    server_name = str(ctx.guild)
+    server_id = ctx.guild.id
+    SQL.execute(f'delete from music where Server_ID ="{server_id}" and Server_Name = "{server_name}"')
+    db.commit()
+    user_name = str(ctx.message.author)
+    queue_name = f"Queue#{server_id}"
+    song_name = f"Song#{server_id}"
+    channel_id = ctx.message.author.voice.channel.id
+    channel_name = str(ctx.message.author.voice.channel)
+    queue_num = 1
+    SQL.execute('insert into Music(Server_ID, Server_Name, Voice_ID, Voice_Name, User_Name, Next_Queue, Queue_Name, Song_Name) values(?,?,?,?,?,?,?,?)',
+                (server_id, server_name, channel_id, channel_name, user_name, queue_num, queue_name, song_name))
+    db.commit()
+    #########################
+
+
     # joining the channel
     global voice
     channel = ctx.message.author.voice.channel
@@ -135,84 +168,120 @@ async def join(ctx):
 @bot.command(name="play", help="Plays audio in the voice channel.")
 async def play(ctx, url: str, *words):
 
-    channel = ctx.author.voice.channel
-    voice = get(bot.voice_clients, guild=ctx.guild)
-
-    if not (voice and voice.is_connected()):
-        await join(ctx)
-
-
     for word in words:
         if word == "-":
             url = url + word
         url = url + "_" + word
 
+    ###DATABASE ORGANIZING###
+    server_name = str(ctx.guild)
+    server_id = ctx.guild.id
+    channel_id = ctx.message.author.voice.channel.id
+    channel_name = str(ctx.message.author.voice.channel)
 
-    async def check_queue():
-        Queue_infile = os.path.isdir("./Queue")
+    channel = ctx.author.voice.channel
+    voice = get(bot.voice_clients, guild=ctx.guild)
+    if not (voice and voice.is_connected()):
+        await join(ctx)
+
+    try:
+        SQL.execute(f'select Song_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}" and Voice_ID="{channel_id}" and Voice_Name="{channel_name}"')
+        name_song = SQL.fetchone()
+        SQL.execute(f'select Server_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        name_server = SQL.fetchone()
+    except:
+        await send_embedded(ctx,"Bot-BB bir ses kanalında değil. (kendiniz bir ses kanalına girdikten sonra !join komutunu kullanın)")
+        return
+
+    #########################
+
+    await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin :)")
+
+    def check_queue():
+        ###DATABASE ORGANIZING###
+        DIR = os.path.dirname(__file__)
+        db = sqlite3.connect(os.path.join(DIR, "SongTracker.db"))
+        SQL = db.cursor()
+        SQL.execute(f'select Queue_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        name_queue = SQL.fetchone()
+        SQL.execute(f'select Server_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        name_server = SQL.fetchone()
+
+        #########################
+
+
+
+        Queue_infile = os.path.isdir("./Queues")
         if Queue_infile is True:
-            DIR = os.path.abspath(os.path.realpath("Queue"))
-            length = len(os.listdir(DIR))
+            DIR = os.path.abspath(os.path.realpath("Queues"))
+            Queue_Main = os.path.join(DIR, name_queue[0])
+            length = len(os.listdir(Queue_Main))
             still_q = length - 1
             try:
-                first_audio = os.listdir(DIR)[0]
-
+                first_audio = os.listdir(Queue_Main)[0]
+                song_num = first_audio.split('-')[0]
             except:
                 print("queue is empty")
-                await ctx.send_embedded(ctx, "Bu da sonuncusuydu.")
-                queues.clear()
+                SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+                db.commit()
                 return
             main_path = os.path.dirname(os.path.realpath(__file__)) 
-            q_path = os.path.abspath(os.path.realpath("Queue") + "\\" + first_audio)
+            q_path = os.path.abspath(os.path.realpath(Queue_Main) + "\\" + first_audio)
 
             if length != 0:
                 print("playing next song")
-                await send_embedded(ctx, "Sıradaki ses çalınıyor.")
-                is_song_exist = os.path.isfile("audio.mp3")
+
+                is_song_exist = os.path.isfile(f"{name_song[0]}({name_server[0]}).mp3")
                 if is_song_exist:
-                    os.remove("audio.mp3")
+                    os.remove(f"{name_song[0]}({name_server[0]}).mp3")
                 shutil.move(q_path, main_path)
 
                 for file in os.listdir("./"):
-                    if file.endswith(".mp3"):
-                        os.rename(file, "audio.mp3")
+                    if file == f"{song_num}-{name_song[0]}({name_server[0]}).mp3":
+                        os.rename(file, f'{name_song[0]}({name_server[0]}).mp3')
 
-                voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: await check_queue())
+                voice.play(discord.FFmpegPCMAudio(f'{name_song[0]}({name_server[0]}).mp3'), after=lambda e: check_queue())
                 voice.source = discord.PCMVolumeTransformer(voice.source)
                 voice.source.volume = 0.07
             else: 
-                queues.clear()
+                SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+                db.commit()                
                 return
         else:
-            queues.clear()
+            SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+            db.commit()
             print("no audio in queue")    
 
 
     # playing audio
-    is_song_exist = os.path.isfile("audio.mp3")
+    is_song_exist = os.path.isfile(f"{name_song[0]}({name_server[0]}).mp3")
     try:
         if is_song_exist:
-            os.remove("audio.mp3")
-            queues.clear()
+            os.remove(f"{name_song[0]}({name_server[0]}).mp3")
+            SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+            db.commit()
             print("old file removed")
 
     except PermissionError:
         await send_embedded(ctx, "Maalesef aynı anda iki ses çalamam.")
         return
 
-    Queue_infile = os.path.isdir("./Queue")
-    try:
-        Queue_folder = "./Queue"
-        if Queue_infile is True:
-            print("old queue folder removed")
-            shutil.rmtree(Queue_folder)
-    except:
-        print("no old queue folder")
+    SQL.execute(f'select Queue_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+    name_queue = SQL.fetchone()
+    Queue_infile = os.path.isdir("./Queues")
+    if Queue_infile is True:
+        DIR = os.path.abspath(os.path.realpath("Queues"))
+        Queue_Main = os.path.join(DIR, name_queue[0])
+        Queue_Main_infile = os.path.isdir(Queue_Main)
+        if Queue_Main_infile is True:
+            print("Removed old queue folder")
+            shutil.rmtree(Queue_Main)
 
 
-    await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin :)")
 
     voice = get(bot.voice_clients, guild=ctx.guild)
+    song_path = f"./{name_song[0]}({name_server[0]}).mp3"
+
     ydl_options = {
         'format': 'bestaudio/best',
         'postprocessors': [{
@@ -226,27 +295,39 @@ async def play(ctx, url: str, *words):
     try:
         with youtube_dl.YoutubeDL(ydl_options) as ydl:
             print("downloading audio")
-            ydl.download([url])
+            info = ydl.extract_info(f"ytsearch1:{url}", download=False)
+            info_dict = info.get('entries', None)[0]
+            print(info_dict)
+            video_title = info_dict.get('title', None)
+            ydl.download([f"ytsearch1:{url}"])
+            for file in os.listdir("./"):
+                if file.endswith(".mp3"):
+                    os.rename(file,f"{name_song[0]}({name_server[0]}).mp3")
     except:
         print("Unsupported url type. Trying Spotify.")
         c_path = os.path.dirname(os.path.realpath(__file__))
-        system("spotdl -f" + '"' + c_path + '"' + " -s " + url)
-    for file in os.listdir('./'):
-        if file.endswith('.mp3'):
-            name = file
-            os.rename(file, 'audio.mp3')
+        system(f"spotdl -ff {name_song[0]}({name_server[0]}) -f " + '"' + c_path + '"' + " -s " + url)
 
-    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: await check_queue())
+
+    voice.play(discord.FFmpegPCMAudio(f"{name_song[0]}({name_server[0]}).mp3"), after= lambda e: check_queue())
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07
 
-    nname = name.rsplit('-')
-
-    await send_embedded(ctx, f"'{nname[0] + nname[1]}' çalınıyor")
-
-
+    try:
+        await send_embedded(ctx, f"{video_title} çalınıyor")
+    except:
+        await send_embedded(ctx, "Özel sebeplerden dolayı şarkı ismini gösteremiyorum. Ama çalınıyor şu an.")
+        await send_embedded(ctx, "Şaka şaka. Geliştiricim şu anki durumda şarkı ismini gösterecek fonksiyonu geliştiremedi.")
 @bot.command(name="leave", help = "Bot-BB leaves current voice channel.")
 async def leave(ctx):
+    ###DATABASE ORGANIZING###
+    server_name = str(ctx.guild)
+    server_id = ctx.guild.id
+    channel_id = ctx.message.author.voice.channel.id
+    channel_name = str(ctx.message.author.voice.channel)
+    SQL.execute(f'delete from music where Server_ID ="{server_id}" and Server_Name = "{server_name}" and Voice_ID="{channel_id}" and Voice_Name="{channel_name}"')
+    db.commit()
+    #########################
     channel = ctx.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
 
@@ -286,13 +367,27 @@ async def resume(ctx):
 
 @bot.command(name="stop", help="Stops currently playing audio.")
 async def stop(ctx):
+    ###DATABASE ORGANIZING###
+    server_name = str(ctx.guild)
+    server_id = ctx.guild.id
+    SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+    db.commit()
+    SQL.execute(f'select Queue_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+    name_queue = SQL.fetchone()
+    #########################
+
+
     voice = get(bot.voice_clients, guild=ctx.guild)
 
     queues.clear()
 
-    queue_infile = os.path.isdir("./Queue")
+    queue_infile = os.path.isdir("./Queues")
     if queue_infile:
-        shutil.rmtree("./Queue")
+        DIR = os.path.abspath(os.path.realpath("Queues"))
+        Queue_Main = os.path.join(DIR, name_queue[0])
+        Queue_Main_infile = os.path.isdir(Queue_Main)
+        if Queue_Main_infile is True:
+            shutil.rmtree(Queue_Main)
 
     if voice and voice.is_playing():
         voice.stop()
@@ -312,22 +407,39 @@ async def queue(ctx, url: str, *words):
             url = url + word
         url = url + "_" + word
 
-    Queue_infile = os.path.isdir("./Queue")
+    ###DATABASE ORGANIZING###
+    server_name = str(ctx.guild)
+    server_id = ctx.guild.id
+
+    try:
+        SQL.execute(f'select Queue_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        name_queue = SQL.fetchone()
+        SQL.execute(f'select Song_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        name_song = SQL.fetchone()
+        SQL.execute(f'select Next_Queue from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+        q_num = SQL.fetchone()
+    except:
+        await ctx.send("The bot must join a voice channel to queue a song: Join one and use '/join'")
+        return    
+    #########################
+
+
+    Queue_infile = os.path.isdir("./Queues")
     if Queue_infile is False:
-        os.mkdir("Queue")
+        os.mkdir("Queues")
 
-    DIR = os.path.abspath(os.path.realpath("Queue"))
-    q_num = len(os.listdir(DIR))
-    q_num += 1
-    add_queue = True 
-    while add_queue:
-        if q_num in queues:
-            q_num += 1
-        else:
-            add_queue = False
-            queues[q_num] = q_num
+    DIR = os.path.abspath(os.path.realpath("Queues"))
+    Queue_Main = os.path.join(DIR, name_queue[0])
+    Queue_Main_infile = os.path.isdir(Queue_Main)
+    if Queue_Main_infile is False:
+        os.mkdir(Queue_Main)
 
-    queue_path = os.path.abspath(os.path.realpath("Queue") + f"\\audio{q_num}.%(ext)s")
+
+    SQL.execute(f'select Server_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+    name_server = SQL.fetchone()
+    queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"\\{q_num[0]}-{name_song[0]}({name_server[0]}).mp3")
+
+
 
     ydl_options = {
     'format': 'bestaudio/best',
@@ -343,12 +455,22 @@ async def queue(ctx, url: str, *words):
     try:
         with youtube_dl.YoutubeDL(ydl_options) as ydl:
             print("downloading audio")
-            ydl.download([url])
+            ydl.download([f"ytsearch1:{url}"])
+            info = ydl.extract_info(f"ytsearch1:{url}", download=False)
+            info_dict = info.get('entries', None)[0]
+            video_title = info_dict.get('title', None)
     except:
-        print("Unsupported url type. Trying Spotify.")
-        q_path = os.path.abspath(os.path.realpath("Queue"))
-        system(f"spotdl -ff audio{q_num} -f "+ '"' + q_path + '"' + " -s "+url)
-    await send_embedded(ctx, f"ses sıraya eklendi!")    
+        Q_DIR = os.path.abspath(os.path.realpath("Queues"))
+        Queue_Path = os.path.join(Q_DIR, name_queue[0])
+        system(f"spotdl -ff {q_num[0]}-{name_song[0]}({name_server[0]}) -f " + '"' + Queue_Path + '"' + " -s " + song_search)
+
+    try:
+        await send_embedded(ctx, f"'{video_title}' sıraya eklendi!")
+    except:
+        await send_embedded(ctx, "Ses sıraya eklendi")    
+
+    SQL.execute('update Music set Next_Queue = Next_Queue + 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+    db.commit()
 
     print("sond added to queue")
 
