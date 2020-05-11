@@ -150,10 +150,18 @@ async def join(ctx):
 @bot.command(name="play", help="Plays audio in the voice channel.")
 async def play(ctx, url: str, *words):
 
+    channel = ctx.author.voice.channel
+    voice = get(bot.voice_clients, guild=ctx.guild)
+
+    if not (voice and voice.is_connected()):
+        await join(ctx)
+
+
     for word in words:
         if word == "-":
             url = url + word
         url = url + "_" + word
+
 
     def check_queue():
         Queue_infile = os.path.isdir("./Queue")
@@ -311,7 +319,7 @@ async def stop(ctx):
 queues = {}
 
 @bot.command(name="queue",help="Adds songs to queue.")
-async def queue(ctx, url: str, *args):
+async def queue(ctx, url: str, *words):
 
     for word in words:
         if word == "-":
