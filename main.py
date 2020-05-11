@@ -177,7 +177,7 @@ async def play(ctx, url: str, *words):
                     if file.endswith(".mp3"):
                         os.rename(file, "audio.mp3")
 
-                voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: check_queue())
+                voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: await check_queue())
                 voice.source = discord.PCMVolumeTransformer(voice.source)
                 voice.source.volume = 0.07
             else: 
@@ -236,7 +236,7 @@ async def play(ctx, url: str, *words):
             name = file
             os.rename(file, 'audio.mp3')
 
-    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: check_queue())
+    voice.play(discord.FFmpegPCMAudio('audio.mp3'), after=lambda e: await check_queue())
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07
 
