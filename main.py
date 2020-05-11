@@ -119,17 +119,15 @@ async def display_covid(ctx, country=None):
 
 @bot.command(name="join", help="Moves bot to users voice channel.")
 async def join(ctx):
-        # joining the channel
+    # joining the channel
     global voice
     channel = ctx.message.author.voice.channel
     voice = get(bot.voice_clients, guild=ctx.guild)
 
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
+    if voice is not None:
+        return await voice.move_to(channel)
 
-    else:
-        voice = await channel.connect()
-        print(f"the bot has connected to {channel} \n")
+    await channel.connect()
 
     await send_embedded(ctx, f"'{channel}' ses kanalına bağlandım")
 
@@ -150,7 +148,7 @@ async def play(ctx, url: str, *words):
         url = url + "_" + word
 
 
-    def check_queue():
+    async def check_queue():
         Queue_infile = os.path.isdir("./Queue")
         if Queue_infile is True:
             DIR = os.path.abspath(os.path.realpath("Queue"))
@@ -302,7 +300,7 @@ async def stop(ctx):
 
     else:
         await send_embedded(ctx, "Ortalık zaten sessiz.")
-        
+
 
 queues = {}
 
@@ -365,6 +363,16 @@ async def next(ctx):
 
     else:
         await send_embedded(ctx, "Oops. Bir şeyler oldu.")
+
+
+@bot.command(name="volume", help="Changes the volume of the currently playing audio.")
+async def volume(ctx, vol:int):
+    if ctx.voice_client is None:
+        return await send_embedded(ctx, "Ayarlanacak ses yok ki.")
+
+    ctx.voice_client.source.volume = vol / 100
+
+    await send_embedded(ctx, f"Ses seviyesi {vol} olarak ayarlandı!")
 
 
 bot.run(TOKEN)
