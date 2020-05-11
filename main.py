@@ -46,8 +46,7 @@ async def on_ready():
 
 @bot.command(name="selam", help="Greets the user.")
 async def greet_the_user(ctx):
-    embed = discord.Embed(color=0x00ff00, description=f"Selam, {ctx.message.author.name}!")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, f"Selam, {ctx.message.author.name}!")
 
 
 @bot.command(name="github", help="opens burakcbdn github profile on browser.")
@@ -58,19 +57,16 @@ async def launch_github(ctx):
 @bot.command(name="translate", help="translates word from source language to destination language.")
 async def translate(ctx, src, dest, word):
     if src not in googletrans.LANGCODES.values():
-        embed = discord.Embed(color=0x00ff00, description="hatalı kaynak dil kodu!")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, "hatalı kaynak dil kodu!")
         return
 
     if dest not in googletrans.LANGCODES.values():
-        embed = discord.Embed(color=0x00ff00, description="hatalı hedef dil kodu!")
-        await ctx.send(embed=embed)
+        await end_embedded(ctx, "hatalı hedef dil kodu!")
         return
 
     translator = googletrans.Translator()
     translated = translator.translate(word, src=src, dest=dest)
-    embed = discord.Embed(color=0x00ff00, description=f" {word} => {translated.text}")
-    await ctx.send(embed=embed)
+    await nd_embedded(ctx, f" {word} => {translated.text}")
 
 
 @bot.command(name="langcodes", help="lists all the available language codes for translate.")
@@ -86,15 +82,13 @@ async def langcodes(ctx):
         pairs.append(f"- {language} => {code}")
 
     pair_list = "\n".join(pairs)
-    embed = discord.Embed(color=0x00ff00, description=pair_list)
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, pair_list)
 
 
 @bot.command(name="roll", help="Rolls a dice.")
 async def roll(ctx):
     dice = random.randint(0, 6)
-    embed = discord.Embed(color=0x00ff00, description=f"gelen zar: {dice}")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, f"gelen zar: {dice}")
     dice = None
 
 
@@ -105,15 +99,11 @@ async def members(ctx):
         member_names.append(member.name)
 
     member_list = "\n".join(member_names)
-    embed = discord.Embed(color=0x00ff00, description=member_list)
-    await ctx.send(embed=embed)
-
+    await send_embedded(ctx, member_list)
 
 @bot.command(name="bot-bb", help="Gives information about Bot-BB")
 async def bot_bb(ctx):
-    embed = discord.Embed(color=0x00ff00,
-                          description="Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, "Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
 
 
 @bot.command(name="covid", help="Shows statistics about covid in country.")
@@ -122,11 +112,9 @@ async def display_covid(ctx, country=None):
         info = getCovidInfo(country)
         tC = info["totalConfirmed"]
         tD = info["totalDeath"]
-        embed = discord.Embed(color=0x00ff00, description=f"-{country}- \n  toplam vaka: {tC} \n  toplam ölüm: {tD}")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, f"-{country}- \n  toplam vaka: {tC} \n  toplam ölüm: {tD}")
     except:
-        embed = discord.Embed(color=0x00ff00, description="Ülke ismi belirtmediniz (!covid turkey)")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, "Ülke ismi belirtmediniz (!covid turkey)")
 
 
 @bot.command(name="join", help="Moves bot to users voice channel.")
@@ -143,8 +131,7 @@ async def join(ctx):
         voice = await channel.connect()
         print(f"the bot has connected to {channel} \n")
 
-    embed = discord.Embed(color=0x00ff00, description=f"'{channel}' ses kanalına bağlandım")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, f"'{channel}' ses kanalına bağlandım")
 
 
 @bot.command(name="play", help="Plays audio in the voice channel.")
@@ -174,6 +161,7 @@ async def play(ctx, url: str, *words):
 
             except:
                 print("queue is empty")
+                await ctx.send_embedded(ctx, "Bu da sonuncusuydu.")
                 queues.clear()
                 return
             main_path = os.path.dirname(os.path.realpath(__file__)) 
@@ -181,6 +169,7 @@ async def play(ctx, url: str, *words):
 
             if length != 0:
                 print("playing next song")
+                await send_embedded(ctx, "Sıradaki ses çalınıyor.")
                 is_song_exist = os.path.isfile("audio.mp3")
                 if is_song_exist:
                     os.remove("audio.mp3")
@@ -210,8 +199,7 @@ async def play(ctx, url: str, *words):
             print("old file removed")
 
     except PermissionError:
-        embed = discord.Embed(color=0x00ff00, description="Maalesef aynı anda iki ses çalamam.")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, "Maalesef aynı anda iki ses çalamam.")
         return
 
     Queue_infile = os.path.isdir("./Queue")
@@ -224,8 +212,7 @@ async def play(ctx, url: str, *words):
         print("no old queue folder")
 
 
-    embed = discord.Embed(color=0x00ff00, description="Sahneye hazırlanıyorum. Beklemelisin :)")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin :)")
 
     voice = get(bot.voice_clients, guild=ctx.guild)
     ydl_options = {
@@ -257,8 +244,7 @@ async def play(ctx, url: str, *words):
 
     nname = name.rsplit('-')
 
-    embed = discord.Embed(color=0x00ff00, description=f"'{nname[0] + nname[1]}' çalınıyor")
-    await ctx.send(embed=embed)
+    await send_embedded(ctx, f"'{nname[0] + nname[1]}' çalınıyor")
 
 
 @bot.command(name="leave", help = "Bot-BB leaves current voice channel.")
@@ -269,13 +255,11 @@ async def leave(ctx):
     if voice and voice.is_connected():
         await voice.disconnect()
         print(f"the bot has left channel {channel}")
-        embed = discord.Embed(color=0x00ff00, description=f"'{channel}' ses kanalından ayrıldım")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, f"'{channel}' ses kanalından ayrıldım")
 
     else:
         print("bot is not in any channel")
-        embed = discord.Embed(color=0x00ff00, description="Herhangi bir kanalda değilim ki :(")
-        await ctx.send(embed=embed)
+        await send_embedded(ctx, "Herhangi bir kanalda değilim ki :(")
 
 
 @bot.command(name="pause", help="Pauses currently playing audio.")
@@ -362,7 +346,7 @@ async def queue(ctx, url: str, *words):
         print("Unsupported url type. Trying Spotify.")
         q_path = os.path.abspath(os.path.realpath("Queue"))
         system(f"spotdl -ff audio{q_num} -f "+ '"' + q_path + '"' + " -s "+url)
-    await send_embedded(ctx, f"ses{q_num} sıraya eklendi!")    
+    await send_embedded(ctx, f"ses sıraya eklendi!")    
 
     print("sond added to queue")
 
