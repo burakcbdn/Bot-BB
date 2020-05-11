@@ -292,6 +292,10 @@ async def stop(ctx):
 
     queues.clear()
 
+    queue_infile = os.path.isdir("./Queue")
+    if queue_infile:
+        shutil.rmtree("./Queue")
+
     if voice and voice.is_playing():
         voice.stop()
         await send_embedded(ctx, "Ses durduruldu")
