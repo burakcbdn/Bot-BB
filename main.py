@@ -108,7 +108,7 @@ async def members(ctx):
 
 @bot.command(name="bot-bb", help="Gives information about Bot-BB")
 async def bot_bb(ctx):
-    await send_embedded(ctx, "Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur")
+    await send_embedded(ctx, "Bot-BB Burak Cabadan ve Billur Baş tarafından yapılmakta olan Discord botudur.")
 
 
 @bot.command(name="covid", help="Shows statistics about covid in country.")
@@ -195,7 +195,7 @@ async def play(ctx, url: str, *words):
 
     #########################
 
-    await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin :)")
+    await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin...")
 
     def check_queue():
         ###DATABASE ORGANIZING###
@@ -221,7 +221,7 @@ async def play(ctx, url: str, *words):
                 first_audio = os.listdir(Queue_Main)[0]
                 song_num = first_audio.split('-')[0]
             except:
-                print("queue is empty")
+                print("queue is empty.")
                 SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
                 db.commit()
                 return
@@ -229,7 +229,7 @@ async def play(ctx, url: str, *words):
             q_path = os.path.abspath(os.path.realpath(Queue_Main) + "\\" + first_audio)
 
             if length != 0:
-                print("playing next song")
+                print("playing next song.")
 
                 is_song_exist = os.path.isfile(f"{name_song[0]}({name_server[0]}).mp3")
                 if is_song_exist:
@@ -250,7 +250,7 @@ async def play(ctx, url: str, *words):
         else:
             SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
             db.commit()
-            print("no audio in queue")    
+            print("no audio in queue.")    
 
 
     # playing audio
@@ -359,10 +359,10 @@ async def resume(ctx):
 
     if voice and voice.is_paused():
         voice.resume()
-        await send_embedded(ctx, "Ses tekrar yürütülüyor.")
+        await send_embedded(ctx, "Kaldığımız yerden devam.")
 
     else:
-        await send_embedded(ctx, "Ses zaten yürütülüyor")
+        await send_embedded(ctx, "Ses zaten yürütülüyor.")
 
 
 @bot.command(name="stop", help="Stops currently playing audio.")
@@ -391,7 +391,7 @@ async def stop(ctx):
 
     if voice and voice.is_playing():
         voice.stop()
-        await send_embedded(ctx, "Ses durduruldu")
+        await send_embedded(ctx, "Ses durduruldu.")
 
     else:
         await send_embedded(ctx, "Ortalık zaten sessiz.")
@@ -419,7 +419,7 @@ async def queue(ctx, url: str, *words):
         SQL.execute(f'select Next_Queue from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
         q_num = SQL.fetchone()
     except:
-        await ctx.send("The bot must join a voice channel to queue a song: Join one and use '/join'")
+        await ctx.send("Bot herhangi bir ses kanalında değil.")
         return    
     #########################
 
@@ -467,7 +467,7 @@ async def queue(ctx, url: str, *words):
     try:
         await send_embedded(ctx, f"'{video_title}' sıraya eklendi!")
     except:
-        await send_embedded(ctx, "Ses sıraya eklendi")    
+        await send_embedded(ctx, "Ses sıraya eklendi.")    
 
     SQL.execute('update Music set Next_Queue = Next_Queue + 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
     db.commit()
@@ -494,7 +494,7 @@ async def volume(ctx, vol:int):
 
     ctx.voice_client.source.volume = vol / 100
 
-    await send_embedded(ctx, f"Ses seviyesi {vol} olarak ayarlandı!")
+    await send_embedded(ctx, f"Ses seviyesi %{vol} olarak ayarlandı!")
 
 
 bot.run(TOKEN)
