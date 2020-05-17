@@ -14,7 +14,7 @@ BB Discord Bot
 - **!members**:
   Shows list of members in the server.
 - **!join**:
-  Joins the users voice channel (required before playing audio).
+  Moves bot to the users voice channel.
 - **!play <*youtube_link or spotify_link or song_name*>**:
   Plays specified audio in the voice channel.
 - **!queue <*youtube_link or spotify_link or song_name*>**:
