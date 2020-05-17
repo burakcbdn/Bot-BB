@@ -1,5 +1,5 @@
 # Bot-BB
-BB Discord Bot
+BB Discord Bot with python
 
 ## commands
 
