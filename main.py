@@ -14,6 +14,7 @@ from os import system
 
 load_dotenv()
 
+
 TOKEN = os.environ.get('BOT_TOKEN')
 GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix="!")
@@ -190,14 +191,13 @@ async def play(ctx, url: str, *words):
         SQL.execute(f'select Server_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
         name_server = SQL.fetchone()
     except:
-        await send_embedded(ctx,"Bot-BB bir ses kanalında değil. (kendiniz bir ses kanalına girdikten sonra !join komutunu kullanın)")
-        return
+        pass
 
     #########################
 
     await send_embedded(ctx, "Sahneye hazırlanıyorum. Beklemelisin...")
-
-    def check_queue():
+    
+    def check_queue(): # burda
         ###DATABASE ORGANIZING###
         DIR = os.path.dirname(__file__)
         db = sqlite3.connect(os.path.join(DIR, "SongTracker.db"))
@@ -210,13 +210,18 @@ async def play(ctx, url: str, *words):
         #########################
 
 
-
+        Queue_Main = ""
+        is_song_exist = False
         Queue_infile = os.path.isdir("./Queues")
         if Queue_infile is True:
-            DIR = os.path.abspath(os.path.realpath("Queues"))
-            Queue_Main = os.path.join(DIR, name_queue[0])
-            length = len(os.listdir(Queue_Main))
-            still_q = length - 1
+            try:
+                DIR = os.path.abspath(os.path.realpath("Queues"))
+                Queue_Main = os.path.join(DIR, name_queue[0])  # şurda
+                length = len(os.listdir(Queue_Main))
+                still_q = length - 1
+            except:
+                pass
+
             try:
                 first_audio = os.listdir(Queue_Main)[0]
                 song_num = first_audio.split('-')[0]
@@ -233,12 +238,38 @@ async def play(ctx, url: str, *words):
 
                 is_song_exist = os.path.isfile(f"{name_song[0]}({name_server[0]}).mp3")
                 if is_song_exist:
+                    print(loopController.isLoop)
+                    if loopController.isLoop == True:
+                        try:
+                            if is_song_exist:
+                                print(f"loop : {loop}")
+                                SQL.execute(f'select Queue_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+                                name_queue = SQL.fetchone()
+                                SQL.execute(f'select Song_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+                                name_song1 = SQL.fetchone()
+                                SQL.execute(f'select Next_Queue from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
+                                q_num = SQL.fetchone()
+
+                                queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"\\{q_num[0]}-{name_song1[0]}({name_server[0]}).mp3")
+                                os.rename(f"{name_song1[0]}({name_server[0]}).mp3", queue_path)
+                                SQL.execute('update Music set Next_Queue = Next_Queue + 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
+
+                                db.commit()
+                                print("old file removed")
+
+                        except PermissionError:
+                            print("sa")
+                            return
+                    else: pass
+                try:
                     os.remove(f"{name_song[0]}({name_server[0]}).mp3")
-                shutil.move(q_path, main_path)
+                except:
+                    shutil.move(q_path, main_path)
 
                 for file in os.listdir("./"):
                     if file == f"{song_num}-{name_song[0]}({name_server[0]}).mp3":
                         os.rename(file, f'{name_song[0]}({name_server[0]}).mp3')
+
 
                 voice.play(discord.FFmpegPCMAudio(f'{name_song[0]}({name_server[0]}).mp3'), after=lambda e: check_queue())
                 voice.source = discord.PCMVolumeTransformer(voice.source)
@@ -257,7 +288,7 @@ async def play(ctx, url: str, *words):
     is_song_exist = os.path.isfile(f"{name_song[0]}({name_server[0]}).mp3")
     try:
         if is_song_exist:
-            os.remove(f"{name_song[0]}({name_server[0]}).mp3")
+            os.remove(f"{name_song[0]}({name_server[0]}).mp3") # add song to the queue
             SQL.execute('update Music set Next_Queue = 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
             db.commit()
             print("old file removed")
@@ -318,6 +349,8 @@ async def play(ctx, url: str, *words):
     except:
         await send_embedded(ctx, "Özel sebeplerden dolayı şarkı ismini gösteremiyorum. Ama çalınıyor şu an.")
         await send_embedded(ctx, "Şaka şaka. Geliştiricim şu anki durumda şarkı ismini gösterecek fonksiyonu geliştiremedi.")
+
+
 @bot.command(name="leave", help = "Bot-BB leaves current voice channel.")
 async def leave(ctx):
     ###DATABASE ORGANIZING###
@@ -379,16 +412,21 @@ async def stop(ctx):
 
     voice = get(bot.voice_clients, guild=ctx.guild)
 
+    try: 
+        queue_infile = os.path.isdir("./Queues")
+        if queue_infile:
+            DIR = os.path.abspath(os.path.realpath("Queues"))
+            Queue_Main = os.path.join(DIR, name_queue[0])
+            Queue_Main_infile = os.path.isdir(Queue_Main)
+            if Queue_Main_infile is True:
+                shutil.rmtree(Queue_Main) 
+                os.rmdir(Queue_Main)  
+    except:
+        pass  
+
     queues.clear()
 
-    queue_infile = os.path.isdir("./Queues")
-    if queue_infile:
-        DIR = os.path.abspath(os.path.realpath("Queues"))
-        Queue_Main = os.path.join(DIR, name_queue[0])
-        Queue_Main_infile = os.path.isdir(Queue_Main)
-        if Queue_Main_infile is True:
-            shutil.rmtree(Queue_Main)
-
+    
     if voice and voice.is_playing():
         voice.stop()
         await send_embedded(ctx, "Ses durduruldu.")
@@ -398,9 +436,9 @@ async def stop(ctx):
 
 
 queues = {}
-
+queue_path = ""
 @bot.command(name="queue",help="Adds songs to queue.")
-async def queue(ctx, url: str, *words):
+async def queue(ctx, url: str, *words,):
 
     for word in words:
         if word == "-":
@@ -418,11 +456,13 @@ async def queue(ctx, url: str, *words):
         name_song = SQL.fetchone()
         SQL.execute(f'select Next_Queue from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
         q_num = SQL.fetchone()
+    
     except:
         await ctx.send("Bot herhangi bir ses kanalında değil.")
         return    
     #########################
 
+    
 
     Queue_infile = os.path.isdir("./Queues")
     if Queue_infile is False:
@@ -472,7 +512,8 @@ async def queue(ctx, url: str, *words):
     SQL.execute('update Music set Next_Queue = Next_Queue + 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
     db.commit()
 
-    print("sond added to queue")
+    print("song added to queue")
+    
 
 
 @bot.command(name="next", help="Plays the next song in queue.")
@@ -484,7 +525,7 @@ async def next(ctx):
         await send_embedded(ctx, "Sıradaki ses oynatılıyor.")
 
     else:
-        await send_embedded(ctx, "Oops. Bir şeyler oldu.")
+        await send_embedded(ctx, "Sırada herhangi bir şarkı yok.")
 
 
 @bot.command(name="volume", help="Changes the volume of the currently playing audio.")
@@ -497,4 +538,28 @@ async def volume(ctx, vol:int):
     await send_embedded(ctx, f"Ses seviyesi %{vol} olarak ayarlandı!")
 
 
+
+class loopController:
+    def __init__(self):
+        self.isLoop = False
+    
+    def setLoop(self):
+        self.isLoop = True
+    
+    def unLoop(self):
+        self.isLoop = False
+
+loopController = loopController()
+
+
+@bot.command(name="loop")
+async def loop(ctx):
+    if (loopController.isLoop):
+        loopController.unLoop()
+        await send_embedded(ctx, "Loop kapalı!")
+    else: 
+        loopController.setLoop()
+        await send_embedded(ctx, "Loop açık!")
+            
+    
 bot.run(TOKEN)
