@@ -7,12 +7,22 @@ import youtube_dl
 import discord
 import shutil
 import sqlite3
+import platform
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
 from os import system
 
 load_dotenv()
+
+slash_prefix = ""
+
+sys = platform.system()
+
+if sys == "Windows":
+    slash_prefix = "\\"
+if sys == "Linux":
+    slash_prefix = "/"
 
 
 TOKEN = os.environ.get('BOT_TOKEN')
@@ -231,7 +241,7 @@ async def play(ctx, url: str, *words):
                 db.commit()
                 return
             main_path = os.path.dirname(os.path.realpath(__file__)) 
-            q_path = os.path.abspath(os.path.realpath(Queue_Main) + "\\" + first_audio)
+            q_path = os.path.abspath(os.path.realpath(Queue_Main) + slash_prefix + first_audio)
 
             if length != 0:
                 print("playing next song.")
@@ -250,7 +260,7 @@ async def play(ctx, url: str, *words):
                                 SQL.execute(f'select Next_Queue from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
                                 q_num = SQL.fetchone()
 
-                                queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"\\{q_num[0]}-{name_song1[0]}({name_server[0]}).mp3")
+                                queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"{slash_prefix}{q_num[0]}-{name_song1[0]}({name_server[0]}).mp3")
                                 os.rename(f"{name_song1[0]}({name_server[0]}).mp3", queue_path)
                                 SQL.execute('update Music set Next_Queue = Next_Queue + 1 where Server_ID = ? and Server_Name = ?', (server_id, server_name))
 
@@ -477,7 +487,7 @@ async def queue(ctx, url: str, *words,):
 
     SQL.execute(f'select Server_Name from Music where Server_ID="{server_id}" and Server_Name="{server_name}"')
     name_server = SQL.fetchone()
-    queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"\\{q_num[0]}-{name_song[0]}({name_server[0]}).mp3")
+    queue_path = os.path.abspath(os.path.realpath(Queue_Main) + f"{slash_prefix}{q_num[0]}-{name_song[0]}({name_server[0]}).mp3")
 
 
 
