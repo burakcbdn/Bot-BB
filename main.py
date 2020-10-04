@@ -28,8 +28,8 @@ DIR = os.path.dirname(__file__)
 db = sqlite3.connect(os.path.join(DIR, "SongTracker.db"))  # connecting to DB if this file is not there it will create it
 SQL = db.cursor()
 
-loopController = loopController()
-osController = osController()
+loopController = LoopController()
+osController = OsController()
 
 slash_prefix = osController.slash_prefix
 

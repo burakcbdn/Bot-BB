@@ -1,5 +1,5 @@
 import platform
-class osController:
+class OsController:
 
     def __init__(self):
         self.slash_prefix = "\\"

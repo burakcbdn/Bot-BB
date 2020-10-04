@@ -1,4 +1,4 @@
-class loopController:
+class LoopController:
     def __init__(self):
         self.isLoop = False
     
