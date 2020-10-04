@@ -3,7 +3,7 @@ class OsController:
 
     def __init__(self):
         self.slash_prefix = "\\"
-        sys = platform.system
+        sys = platform.system()
         if (sys == "Windows"):
             self.slash_prefix = "\\"
         elif (sys == "Linux"):
