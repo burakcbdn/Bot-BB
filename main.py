@@ -1,4 +1,4 @@
-import os
+import os 
 import random
 import webbrowser
 import googletrans
@@ -70,7 +70,7 @@ async def greet_the_user(ctx):
 
 @bot.command(name="github", help="Burak Cabadan Github")
 async def launch_github(ctx):
-    await send_embedded(ctx, "Burak Cabadan Github: \n https://www.github.com/burakcbdn")
+    await send_embedded(ctx, "Burak Cabadan Github: \n https://www.github.com/burakcbdn \n\n Billur Baş Github: \n https://www.github.com/billurbs")
 
 
 @bot.command(name="translate", help="translates word from source language to destination language.")
