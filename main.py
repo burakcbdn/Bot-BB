@@ -42,6 +42,10 @@ queue_path = ""
 def main():
     bot.run(TOKEN)
 
+async def send_embedded(ctx, content):
+    embed = discord.Embed(color=0x00ff00, description=content)
+    await ctx.send(embed=embed)
+
 def getCovidInfo(country):
     response = requests.get("https://api.covid19api.com/summary")
 
