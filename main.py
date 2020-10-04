@@ -8,9 +8,9 @@ import discord
 import shutil
 import sqlite3
 import platform
-import loop_controller
-import os_controller
-import message_sender
+from loop_controller import LoopController
+from os_controller import OsController
+from message_sender import send_embedded
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
