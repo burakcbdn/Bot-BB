@@ -9,11 +9,7 @@ import shutil
 import sqlite3
 import platform
 from loop_controller import LoopController
-print("imported 1")
 from os_controller import OsController
-print("imported 2")
-from message_sender import send_embedded
-print("imported 3")
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
