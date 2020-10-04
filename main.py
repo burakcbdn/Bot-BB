@@ -80,7 +80,7 @@ async def translate(ctx, src, dest, word):
         return
 
     if dest not in googletrans.LANGCODES.values():
-        await end_embedded(ctx, "hatalı hedef dil kodu!")
+        await send_embedded(ctx, "hatalı hedef dil kodu!")
         return
 
     translator = googletrans.Translator()
@@ -514,7 +514,7 @@ async def queue(ctx, url: str, *words,):
     except:
         Q_DIR = os.path.abspath(os.path.realpath("Queues"))
         Queue_Path = os.path.join(Q_DIR, name_queue[0])
-        system(f"spotdl -ff {q_num[0]}-{name_song[0]}({name_server[0]}) -f " + '"' + Queue_Path + '"' + " -s " + song_search)
+        system(f"spotdl -ff {q_num[0]}-{name_song[0]}({name_server[0]}) -f " + '"' + Queue_Path + '"' + " -s ")
 
     try:
         await send_embedded(ctx, f"'{video_title}' sıraya eklendi!")
