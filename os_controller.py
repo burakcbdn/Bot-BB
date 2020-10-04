@@ -6,7 +6,7 @@ class osController:
         sys = platform.system
         if (sys == "Windows"):
             self.slash_prefix = "\\"
-        else if (sys == "Linux"):
+        elif (sys == "Linux"):
             self.slash_prefix = "/"
         
     
