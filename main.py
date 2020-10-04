@@ -8,6 +8,9 @@ import discord
 import shutil
 import sqlite3
 import platform
+import loop_controller
+import os_controller
+import message_sender
 from discord.ext import commands
 from discord.utils import get
 from dotenv import load_dotenv
@@ -17,27 +20,24 @@ load_dotenv()
 
 slash_prefix = ""
 
-sys = platform.system()
-
-if sys == "Windows":
-    slash_prefix = "\\"
-if sys == "Linux":
-    slash_prefix = "/"
-
-
 TOKEN = os.environ.get('BOT_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
 bot = commands.Bot(command_prefix="!")
+
 DIR = os.path.dirname(__file__)
+
 db = sqlite3.connect(os.path.join(DIR, "SongTracker.db"))  # connecting to DB if this file is not there it will create it
 SQL = db.cursor()
 
+loopController = loopController()
+osController = osController()
 
+slash_prefix = osController.slash_prefix
 
-async def send_embedded(ctx, content):
-    embed = discord.Embed(color=0x00ff00, description=content)
-    await ctx.send(embed=embed)
+queues = {}
+queue_path = ""
 
+def main():
+    bot.run(TOKEN)
 
 def getCovidInfo(country):
     response = requests.get("https://api.covid19api.com/summary")
@@ -65,9 +65,9 @@ async def greet_the_user(ctx):
     await send_embedded(ctx, f"Selam, {ctx.message.author.name}!")
 
 
-@bot.command(name="github", help="opens burakcbdn github profile on browser.")
+@bot.command(name="github", help="Burak Cabadan Github")
 async def launch_github(ctx):
-    webbrowser.open("www.github.com/burakcbdn")
+    await send_embedded(ctx, "Burak Cabadan Github: \n https://www.github.com/burakcbdn")
 
 
 @bot.command(name="translate", help="translates word from source language to destination language.")
@@ -82,7 +82,7 @@ async def translate(ctx, src, dest, word):
 
     translator = googletrans.Translator()
     translated = translator.translate(word, src=src, dest=dest)
-    await nd_embedded(ctx, f" {word} => {translated.text}")
+    await send_embedded(ctx, f" {word} => {translated.text}")
 
 
 @bot.command(name="langcodes", help="lists all the available language codes for translate.")
@@ -116,6 +116,7 @@ async def members(ctx):
 
     member_list = "\n".join(member_names)
     await send_embedded(ctx, member_list)
+
 
 @bot.command(name="bot-bb", help="Gives information about Bot-BB")
 async def bot_bb(ctx):
@@ -445,8 +446,6 @@ async def stop(ctx):
         await send_embedded(ctx, "Ortalık zaten sessiz.")
 
 
-queues = {}
-queue_path = ""
 @bot.command(name="queue",help="Adds songs to queue.")
 async def queue(ctx, url: str, *words,):
 
@@ -525,7 +524,6 @@ async def queue(ctx, url: str, *words,):
     print("song added to queue")
     
 
-
 @bot.command(name="next", help="Plays the next song in queue.")
 async def next(ctx):
     voice = get(bot.voice_clients, guild=ctx.guild)
@@ -548,20 +546,6 @@ async def volume(ctx, vol:int):
     await send_embedded(ctx, f"Ses seviyesi %{vol} olarak ayarlandı!")
 
 
-
-class loopController:
-    def __init__(self):
-        self.isLoop = False
-    
-    def setLoop(self):
-        self.isLoop = True
-    
-    def unLoop(self):
-        self.isLoop = False
-
-loopController = loopController()
-
-
 @bot.command(name="loop")
 async def loop(ctx):
     if (loopController.isLoop):
@@ -571,5 +555,6 @@ async def loop(ctx):
         loopController.setLoop()
         await send_embedded(ctx, "Loop açık!")
             
-    
-bot.run(TOKEN)
+
+if __name__ == "__main":
+    main()
